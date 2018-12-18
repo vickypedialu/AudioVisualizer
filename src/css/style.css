@@ -1,0 +1,27 @@
+#background {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background-color: #3733;
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
+}
+
+
+#title {
+    text-align: center;
+    position: absolute;
+    width: 100%;
+    top: calc(50% - 100px);
+    color: #fff;
+    height: 100px;
+    text-shadow: 0 0 15px rgba(0, 0, 0, 0.8), 0 0 35px rgba(0, 0, 0, 0.8);
+    font-size: 40px;
+    -webkit-text-stroke: 1px #fff;
+    overflow: hidden;
+    line-height: 100px;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}

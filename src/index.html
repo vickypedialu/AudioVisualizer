@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Audio Visualizer</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <script src="js/jquery-3.3.1.min.js"></script>
@@ -11,7 +12,9 @@
 <script src="js/OrbitControls.js"></script>
 <script src="js/visualizer.js"></script>
 
-<label id="guide" style="position:fixed;color:black; margin:10px;">Drag and drop a mp3 file</label>
+<div id="background"></div>
+<input id="upload_music" type="file" class="hidden" accept="audio/mp3" multiple>
+<h1 id="title">Drag and drop a music file</h1>
 
 
 </body>

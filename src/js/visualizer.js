@@ -1,12 +1,20 @@
 
-let visualizer;
+let visualizer, $upload, $title;
+
+
 
 $(document).ready(function () {
+
+  $upload = $("#upload_music");
+  $title = $("#title");
+
+
   visualizer = new AudioVisualizer();
   visualizer.initialize();
   visualizer.createBars();
   visualizer.handleActions();
   visualizer.processAudio();
+
 
 });
 
@@ -64,9 +72,6 @@ AudioVisualizer.prototype.initialize = function(){
 
   });
 
-  // Set background color of scene
-  this.renderer.setClearColor(0x333F47, 1);
-
   // Create a light and add it to the scene
   let light = new THREE.PointLight(0xffffff);
   light.position.set(-100, 200, 100);
@@ -74,6 +79,8 @@ AudioVisualizer.prototype.initialize = function(){
 
   // Add controls
   this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+
+
 
 };
 
@@ -140,26 +147,43 @@ AudioVisualizer.prototype.handleActions = function () {
 
         e.preventDefault();
 
-        // Obtain the music file
-        let file = e.dataTransfer.files[0];
-        let fileName = file.name;
+        obtainMusic(e.dataTransfer.files);
 
-        $("#guide").text("Playing " + fileName);
-
-        let fileReader = new FileReader();
-
-        fileReader.onload = function (e) {
-            let fileResult = e.target.result;
-            visualizer.start(fileResult);
-        };
-
-        fileReader.onerror = function (e) {
-            debugger
-        };
-
-        fileReader.readAsArrayBuffer(file);
     }, false);
+
+    $title.on("click", function(e) {
+        $upload.click();
+    });
+
+    $upload.on("change", function(e) {
+        let files = document.getElementById("upload_music").files;
+        obtainMusic(files);
+    })
 };
+
+// Obtain the music file uploaded by user
+function obtainMusic(files) {
+    let file = files[0];
+    let fileName = file.name;
+
+    // Change title to display file name
+    $title.text("Playing " + fileName);
+
+
+    let fileReader = new FileReader();
+
+    fileReader.onload = function (e) {
+        let fileResult = e.target.result;
+        visualizer.start(fileResult);
+    };
+
+    fileReader.onerror = function (e) {
+        debugger
+    };
+
+    fileReader.readAsArrayBuffer(file);
+
+}
 
 // Process music file
 AudioVisualizer.prototype.processAudio = function () {
