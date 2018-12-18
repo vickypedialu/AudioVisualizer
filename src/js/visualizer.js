@@ -1,3 +1,4 @@
+
 let visualizer;
 
 $(document).ready(function () {
@@ -15,9 +16,18 @@ function AudioVisualizer(){
   this.camera;
   this.renderer;
 
+  // For user interaction
+  this.controls;
+
   // Bars are 3D shapes for music visualizations
   this.bars = [];
   this.barNumber = 60;
+
+  // For audio processing
+  this.jsNode;
+  this.audioContext;
+  this.sourceBuffer;
+  this.analyser;
 
 }
 
@@ -30,6 +40,10 @@ AudioVisualizer.prototype.initialize = function(){
 
   this.renderer = new THREE.WebGLRenderer({antialias:true});
   this.renderer.setSize(WIDTH, HEIGHT);
+
+
+  // Append the render to document body
+  document.body.appendChild(this.renderer.domElement);
 
   // Create a camera and add it to the scene
   this.camera = new THREE.PerspectiveCamera(40,WIDTH/HEIGHT,0.1,20000);
@@ -58,6 +72,9 @@ AudioVisualizer.prototype.initialize = function(){
   light.position.set(-100, 200, 100);
   this.scene.add(light);
 
+  // Add controls
+  this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+
 };
 
 // Create some bars for music visualization
@@ -82,6 +99,22 @@ AudioVisualizer.prototype.createBars = function () {
     // Add the newly-created bar to the scene
     this.scene.add(this.bars[i]);
   }
+};
+
+// Start audio processing
+AudioVisualizer.prototype.start = function (buffer) {
+    this.audioContext.decodeAudioData(buffer, decodeAudioDataSuccess, decodeAudioDataFailed);
+    let that = this;
+
+    function decodeAudioDataSuccess(decodedBuffer) {
+        // Get the successfully decoded audio buffer
+        that.sourceBuffer.buffer = decodedBuffer
+        that.sourceBuffer.start(0);
+    }
+
+    function decodeAudioDataFailed() {
+        debugger
+    }
 };
 
 
@@ -132,8 +165,8 @@ AudioVisualizer.prototype.handleActions = function () {
 AudioVisualizer.prototype.processAudio = function () {
 
     this.audioContext = new AudioContext();
-    this.javascriptNode = this.audioContext.createScriptProcessor(2048, 1, 1);
-    this.javascriptNode.connect(this.audioContext.destination);
+    this.jsNode = this.audioContext.createScriptProcessor(2048, 1, 1);
+    this.jsNode.connect(this.audioContext.destination);
 
     // Create the source buffer and analyser node
     this.sourceBuffer = this.audioContext.createBufferSource();
@@ -143,19 +176,21 @@ AudioVisualizer.prototype.processAudio = function () {
 
     // Connect source to analyser, analyser to speaker
     this.sourceBuffer.connect(this.analyser);
-    this.analyser.connect(this.javascriptNode);
+    this.analyser.connect(this.jsNode);
     this.sourceBuffer.connect(this.audioContext.destination);
 
     let that = this;
 
     // Animate the bars
-    this.javascriptNode.onaudioprocess = function () {
+    this.jsNode.onaudioprocess = function () {
 
         let array = new Uint8Array(that.analyser.frequencyBinCount);
         that.analyser.getByteFrequencyData(array);
 
         // Render the scene
         visualizer.renderer.render(visualizer.scene, visualizer.camera);
+
+        visualizer.controls.update();
 
         let step = Math.round(array.length / visualizer.barNumber);
         // Iterate through the bars and scale the z axis
@@ -167,20 +202,6 @@ AudioVisualizer.prototype.processAudio = function () {
     }
 };
 
-// Start audio processing
-AudioVisualizer.prototype.start = function (buffer) {
-    this.audioContext.decodeAudioData(buffer, decodeAudioDataSuccess, decodeAudioDataFailed);
-    let that = this;
 
-    function decodeAudioDataSuccess(decodedBuffer) {
-        // Get the successfully decoded audio buffer
-        that.sourceBuffer.buffer = decodedBuffer
-        that.sourceBuffer.start(0);
-    }
-
-    function decodeAudioDataFailed() {
-        debugger
-    }
-};
 
 
