@@ -167,4 +167,20 @@ AudioVisualizer.prototype.processAudio = function () {
     }
 };
 
+// Start audio processing
+AudioVisualizer.prototype.start = function (buffer) {
+    this.audioContext.decodeAudioData(buffer, decodeAudioDataSuccess, decodeAudioDataFailed);
+    let that = this;
+
+    function decodeAudioDataSuccess(decodedBuffer) {
+        // Get the successfully decoded audio buffer
+        that.sourceBuffer.buffer = decodedBuffer
+        that.sourceBuffer.start(0);
+    }
+
+    function decodeAudioDataFailed() {
+        debugger
+    }
+};
+
 
